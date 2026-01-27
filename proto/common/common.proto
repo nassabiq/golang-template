@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "github.com/nassabiq/golang-template/proto/common;common_proto";
+
+message MetaData {
+  int32 code = 1;
+  string message = 2;
+}
+
+message Pagination {
+  int32 limit = 1;
+  int32 offset = 2;
+  int64 total = 3;
+}

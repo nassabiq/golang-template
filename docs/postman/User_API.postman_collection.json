@@ -1,0 +1,207 @@
+{
+    "info": {
+        "_postman_id": "user-collection-golang-template",
+        "name": "User API - Golang Template",
+        "description": "Postman collection untuk User module pada Golang Template project.\n\n## Setup\n1. Jalankan server: `make run`\n2. Server berjalan di http://localhost:8080\n3. Login menggunakan Auth API untuk mendapatkan access token.\n4. Set variable `access_token` dengan token yang didapatkan.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{access_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "List Users",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/users?page=1&limit=10",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users"
+                    ],
+                    "query": [
+                        {
+                            "key": "page",
+                            "value": "1",
+                            "description": "Halaman ke-n"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "10",
+                            "description": "Jumlah data per halaman"
+                        },
+                        {
+                            "key": "search",
+                            "value": "",
+                            "description": "Cari berdasarkan nama atau email (optional)",
+                            "disabled": true
+                        },
+                        {
+                            "key": "role",
+                            "value": "",
+                            "description": "Filter berdasarkan role (optional)",
+                            "disabled": true
+                        }
+                    ]
+                },
+                "description": "Mendapatkan daftar user dengan pagination dan filter.\n\n**Query Params:**\n- `page`: Nomor halaman (default: 1)\n- `limit`: Jumlah data per halaman (default: 10)\n- `search`: Pencarian nama/email\n- `role`: Filter role user"
+            },
+            "response": []
+        },
+        {
+            "name": "Get Me",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/users/me",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users",
+                        "me"
+                    ]
+                },
+                "description": "Mendapatkan profil user yang sedang login."
+            },
+            "response": []
+        },
+        {
+            "name": "Get User By ID",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/users/:id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "",
+                            "description": "UUID user"
+                        }
+                    ]
+                },
+                "description": "Mendapatkan detail user berdasarkan ID."
+            },
+            "response": []
+        },
+        {
+            "name": "Create User",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"New User\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"role_id\": \"user\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/users",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users"
+                    ]
+                },
+                "description": "Membuat user baru (biasanya admin only).\n\n**Request Body:**\n- `name`: Nama user\n- `email`: Email user\n- `password`: Password user\n- `role_id`: Role ID (misal: 'user' atau UUID role)"
+            },
+            "response": []
+        },
+        {
+            "name": "Update User",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"Updated Name\",\n    \"email\": \"updated@example.com\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/users/:id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "",
+                            "description": "UUID user"
+                        }
+                    ]
+                },
+                "description": "Update data user.\n\n**Request Body:**\n- `name`: Nama baru (optional)\n- `email`: Email baru (optional)\n- `role_id`: Role baru (optional)"
+            },
+            "response": []
+        },
+        {
+            "name": "Delete User",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/users/:id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "users",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "",
+                            "description": "UUID user"
+                        }
+                    ]
+                },
+                "description": "Menghapus user (soft delete)."
+            },
+            "response": []
+        }
+    ]
+}

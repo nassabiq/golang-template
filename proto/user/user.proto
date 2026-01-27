@@ -1,0 +1,315 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "proto/common/common.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/nassabiq/golang-template/proto/user;user_proto";
+
+// OpenAPI Swagger Info
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "User Management API"
+    version: "1.0"
+    description: "API untuk manajemen user termasuk CRUD operations"
+    contact: {
+      name: "API Support"
+      email: "support@example.com"
+    }
+  }
+  schemes: HTTP
+  schemes: HTTPS
+  consumes: "application/json"
+  produces: "application/json"
+  security_definitions: {
+    security: {
+      key: "Bearer"
+      value: {
+        type: TYPE_API_KEY
+        in: IN_HEADER
+        name: "Authorization"
+        description: "Enter 'Bearer {token}' to authenticate"
+      }
+    }
+  }
+  security: {
+    security_requirement: {
+      key: "Bearer"
+      value: {}
+    }
+  }
+};
+
+service UserService {
+  // Get list of users with pagination and filter
+  rpc List(ListUserRequest) returns (ListUserResponse) {
+    option (google.api.http) = {
+      get: "/users"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List Users"
+      description: "Mendapatkan daftar user dengan pagination dan filter"
+      tags: "Users"
+      security: {
+        security_requirement: {
+          key: "Bearer"
+          value: {}
+        }
+      }
+      responses: {
+        key: "200"
+        value: {
+          description: "Daftar user berhasil didapatkan"
+        }
+      }
+      responses: {
+        key: "401"
+        value: {
+          description: "Unauthorized - Token tidak valid"
+        }
+      }
+    };
+  }
+  
+  // Get current authenticated user profile
+  rpc GetMe(Empty) returns (UserResponse) {
+    option (google.api.http) = {
+      get: "/users/me"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get Current User"
+      description: "Mendapatkan profil user yang sedang login"
+      tags: "Users"
+      security: {
+        security_requirement: {
+          key: "Bearer"
+          value: {}
+        }
+      }
+      responses: {
+        key: "200"
+        value: {
+          description: "Profil user berhasil didapatkan"
+        }
+      }
+      responses: {
+        key: "401"
+        value: {
+          description: "Unauthorized - Token tidak valid"
+        }
+      }
+    };
+  }
+
+  // Get user by ID
+  rpc GetByID(GetByIDRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      get: "/users/{id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get User by ID"
+      description: "Mendapatkan detail user berdasarkan ID"
+      tags: "Users"
+      security: {
+        security_requirement: {
+          key: "Bearer"
+          value: {}
+        }
+      }
+      responses: {
+        key: "200"
+        value: {
+          description: "User berhasil ditemukan"
+        }
+      }
+      responses: {
+        key: "404"
+        value: {
+          description: "User tidak ditemukan"
+        }
+      }
+    };
+  }
+
+  // Create new user
+  rpc Create(CreateUserRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      post: "/users"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Create User"
+      description: "Membuat user baru (admin only)"
+      tags: "Users"
+      security: {
+        security_requirement: {
+          key: "Bearer"
+          value: {}
+        }
+      }
+      responses: {
+        key: "200"
+        value: {
+          description: "User berhasil dibuat"
+        }
+      }
+      responses: {
+        key: "400"
+        value: {
+          description: "Data tidak valid"
+        }
+      }
+      responses: {
+        key: "409"
+        value: {
+          description: "Email sudah terdaftar"
+        }
+      }
+    };
+  }
+
+  // Update user
+  rpc Update(UpdateUserRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      put: "/users/{id}"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Update User"
+      description: "Mengupdate data user"
+      tags: "Users"
+      security: {
+        security_requirement: {
+          key: "Bearer"
+          value: {}
+        }
+      }
+      responses: {
+        key: "200"
+        value: {
+          description: "User berhasil diupdate"
+        }
+      }
+      responses: {
+        key: "404"
+        value: {
+          description: "User tidak ditemukan"
+        }
+      }
+    };
+  }
+
+  // Delete user
+  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {
+    option (google.api.http) = {
+      delete: "/users/{id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Delete User"
+      description: "Menghapus user (soft delete)"
+      tags: "Users"
+      security: {
+        security_requirement: {
+          key: "Bearer"
+          value: {}
+        }
+      }
+      responses: {
+        key: "200"
+        value: {
+          description: "User berhasil dihapus"
+        }
+      }
+      responses: {
+        key: "404"
+        value: {
+          description: "User tidak ditemukan"
+        }
+      }
+    };
+  }
+}
+
+// User entity
+message User {
+  // UUID user
+  string id = 1;
+  // Nama lengkap user
+  string name = 2;
+  // Email user
+  string email = 3;
+  // Role user (admin, user, etc)
+  string role = 4;
+  // Timestamp pembuatan
+  google.protobuf.Timestamp created_at = 5;
+  // Timestamp update terakhir
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// Filter untuk list user
+message UserFilter {
+  // Search by name atau email
+  optional string search = 1;
+  // Filter by role
+  optional string role = 2;
+  // Filter by active status
+  optional bool is_active = 3;
+}
+
+// Request untuk list user
+message ListUserRequest {
+  // Jumlah data per halaman (default: 10)
+  int32 limit = 1;
+  // Offset untuk pagination  
+  int32 offset = 2;
+  // Filter opsional
+  UserFilter filter = 3;
+}
+
+message GetByIDRequest {
+  // UUID user yang dicari
+  string id = 1;
+}
+
+message CreateUserRequest {
+  // Nama lengkap user
+  string name = 1;
+  // Email user (harus unik)
+  string email = 2;
+  // Password user
+  string password = 3;
+  // Role ID user
+  string role_id = 4;
+}
+
+message UpdateUserRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string email = 3;
+  optional string role_id = 4;
+}
+
+message DeleteUserRequest {
+  string id = 1;
+}
+
+// Response untuk list user
+message ListUserResponse {
+  repeated User users = 1;
+  common.v1.MetaData metadata = 2;
+  common.v1.Pagination pagination = 3;
+}
+
+message UserResponse {
+  common.v1.MetaData metadata = 1;
+  User data = 2;
+}
+
+message DeleteUserResponse {
+  common.v1.MetaData metadata = 1;
+}
+
+message Empty {}

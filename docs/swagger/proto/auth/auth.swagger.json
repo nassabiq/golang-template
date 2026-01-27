@@ -1,0 +1,401 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Authentication API",
+    "description": "API untuk autentikasi user termasuk login, register, refresh token, dan reset password",
+    "version": "1.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    }
+  },
+  "tags": [
+    {
+      "name": "AuthService"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/auth/forgot-password": {
+      "post": {
+        "summary": "Forgot Password",
+        "description": "Mengirim email reset password ke alamat email yang terdaftar",
+        "operationId": "AuthService_ForgotPassword",
+        "responses": {
+          "200": {
+            "description": "Email reset password terkirim (jika email terdaftar)",
+            "schema": {
+              "$ref": "#/definitions/v1MessageResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ForgotPasswordRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login User",
+        "description": "Autentikasi user dengan email dan password, mengembalikan access token dan refresh token",
+        "operationId": "AuthService_Login",
+        "responses": {
+          "200": {
+            "description": "Login berhasil",
+            "schema": {
+              "$ref": "#/definitions/v1AuthResponse"
+            }
+          },
+          "401": {
+            "description": "Email atau password salah",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1LoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Logout User",
+        "description": "Invalidate refresh token sehingga tidak bisa digunakan lagi",
+        "operationId": "AuthService_Logout",
+        "responses": {
+          "200": {
+            "description": "Logout berhasil",
+            "schema": {
+              "$ref": "#/definitions/v1MessageResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1LogoutRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/logout-all": {
+      "post": {
+        "summary": "Logout All Devices",
+        "description": "Invalidate semua refresh token user sehingga logout dari semua device",
+        "operationId": "AuthService_LogoutAll",
+        "responses": {
+          "200": {
+            "description": "Logout dari semua device berhasil",
+            "schema": {
+              "$ref": "#/definitions/v1MessageResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh Token",
+        "description": "Mendapatkan access token baru menggunakan refresh token yang valid",
+        "operationId": "AuthService_Refresh",
+        "responses": {
+          "200": {
+            "description": "Token berhasil diperbarui",
+            "schema": {
+              "$ref": "#/definitions/v1AuthResponse"
+            }
+          },
+          "401": {
+            "description": "Refresh token tidak valid atau expired",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1RefreshRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register User",
+        "description": "Mendaftarkan user baru ke sistem",
+        "operationId": "AuthService_Register",
+        "responses": {
+          "200": {
+            "description": "Registrasi berhasil",
+            "schema": {
+              "$ref": "#/definitions/v1MessageResponse"
+            }
+          },
+          "409": {
+            "description": "Email sudah terdaftar",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1RegisterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Reset Password",
+        "description": "Reset password menggunakan token yang dikirim via email",
+        "operationId": "AuthService_ResetPassword",
+        "responses": {
+          "200": {
+            "description": "Password berhasil direset",
+            "schema": {
+              "$ref": "#/definitions/v1MessageResponse"
+            }
+          },
+          "400": {
+            "description": "Token tidak valid atau expired",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ResetPasswordRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Authentication"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1AuthResponse": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string"
+        },
+        "refreshToken": {
+          "type": "string"
+        }
+      }
+    },
+    "v1ForgotPasswordRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "v1LoginRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "v1LogoutRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string"
+        }
+      }
+    },
+    "v1MessageResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v1RefreshRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string"
+        }
+      }
+    },
+    "v1RegisterRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "passwordConfirmation": {
+          "type": "string"
+        }
+      }
+    },
+    "v1ResetPasswordRequest": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "newPassword": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "description": "Enter 'Bearer {token}' to authenticate",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

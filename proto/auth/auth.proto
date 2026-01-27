@@ -1,0 +1,240 @@
+syntax = "proto3";
+
+package auth.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/nassabiq/golang-template/proto/auth;auth_proto";
+
+// OpenAPI Swagger Info
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Authentication API"
+    version: "1.0"
+    description: "API untuk autentikasi user termasuk login, register, refresh token, dan reset password"
+    contact: {
+      name: "API Support"
+      email: "support@example.com"
+    }
+  }
+  schemes: HTTP
+  schemes: HTTPS
+  consumes: "application/json"
+  produces: "application/json"
+  security_definitions: {
+    security: {
+      key: "Bearer"
+      value: {
+        type: TYPE_API_KEY
+        in: IN_HEADER
+        name: "Authorization"
+        description: "Enter 'Bearer {token}' to authenticate"
+      }
+    }
+  }
+};
+
+service AuthService {
+  // Login user dengan email dan password
+  rpc Login(LoginRequest) returns (AuthResponse) {
+    option (google.api.http) = {
+      post: "/auth/login"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Login User"
+      description: "Autentikasi user dengan email dan password, mengembalikan access token dan refresh token"
+      tags: "Authentication"
+      responses: {
+        key: "200"
+        value: {
+          description: "Login berhasil"
+        }
+      }
+      responses: {
+        key: "401"
+        value: {
+          description: "Email atau password salah"
+        }
+      }
+    };
+  }
+
+  // Refresh access token menggunakan refresh token
+  rpc Refresh(RefreshRequest) returns (AuthResponse) {
+    option (google.api.http) = {
+      post: "/auth/refresh"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Refresh Token"
+      description: "Mendapatkan access token baru menggunakan refresh token yang valid"
+      tags: "Authentication"
+      responses: {
+        key: "200"
+        value: {
+          description: "Token berhasil diperbarui"
+        }
+      }
+      responses: {
+        key: "401"
+        value: {
+          description: "Refresh token tidak valid atau expired"
+        }
+      }
+    };
+  }
+
+  // Logout user dan invalidate refresh token
+  rpc Logout(LogoutRequest) returns (MessageResponse) {
+    option (google.api.http) = {
+      post: "/auth/logout"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Logout User"
+      description: "Invalidate refresh token sehingga tidak bisa digunakan lagi"
+      tags: "Authentication"
+      responses: {
+        key: "200"
+        value: {
+          description: "Logout berhasil"
+        }
+      }
+    };
+  }
+
+  // Logout dari semua device
+  rpc LogoutAll(google.protobuf.Empty) returns (MessageResponse) {
+    option (google.api.http) = {
+      post: "/auth/logout-all"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Logout All Devices"
+      description: "Invalidate semua refresh token user sehingga logout dari semua device"
+      tags: "Authentication"
+      security: {
+        security_requirement: {
+          key: "Bearer"
+          value: {}
+        }
+      }
+      responses: {
+        key: "200"
+        value: {
+          description: "Logout dari semua device berhasil"
+        }
+      }
+    };
+  }
+
+  // Register user baru
+  rpc Register(RegisterRequest) returns (MessageResponse) {
+    option (google.api.http) = {
+      post: "/auth/register"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Register User"
+      description: "Mendaftarkan user baru ke sistem"
+      tags: "Authentication"
+      responses: {
+        key: "200"
+        value: {
+          description: "Registrasi berhasil"
+        }
+      }
+      responses: {
+        key: "409"
+        value: {
+          description: "Email sudah terdaftar"
+        }
+      }
+    };
+  }
+
+  // Request forgot password
+  rpc ForgotPassword(ForgotPasswordRequest) returns (MessageResponse) {
+    option (google.api.http) = {
+      post: "/auth/forgot-password"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Forgot Password"
+      description: "Mengirim email reset password ke alamat email yang terdaftar"
+      tags: "Authentication"
+      responses: {
+        key: "200"
+        value: {
+          description: "Email reset password terkirim (jika email terdaftar)"
+        }
+      }
+    };
+  }
+
+  // Reset password dengan token
+  rpc ResetPassword(ResetPasswordRequest) returns (MessageResponse) {
+    option (google.api.http) = {
+      post: "/auth/reset-password"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Reset Password"
+      description: "Reset password menggunakan token yang dikirim via email"
+      tags: "Authentication"
+      responses: {
+        key: "200"
+        value: {
+          description: "Password berhasil direset"
+        }
+      }
+      responses: {
+        key: "400"
+        value: {
+          description: "Token tidak valid atau expired"
+        }
+      }
+    };
+  }
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterRequest {
+  string name = 1;
+  string email = 2;
+  string phone = 3;
+  string password = 4;
+  string password_confirmation = 5;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message AuthResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+message ForgotPasswordRequest {
+  string email = 1;
+}
+
+message ResetPasswordRequest {
+  string token = 1;
+  string new_password = 2;
+}
+
+message MessageResponse {
+  string message = 1;
+}

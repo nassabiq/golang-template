@@ -1,0 +1,502 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "User Management API",
+    "description": "API untuk manajemen user termasuk CRUD operations",
+    "version": "1.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    }
+  },
+  "tags": [
+    {
+      "name": "UserService"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "summary": "List Users",
+        "description": "Mendapatkan daftar user dengan pagination dan filter",
+        "operationId": "UserService_List",
+        "responses": {
+          "200": {
+            "description": "Daftar user berhasil didapatkan",
+            "schema": {
+              "$ref": "#/definitions/v1ListUserResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Token tidak valid",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "description": "Jumlah data per halaman (default: 10)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "offset",
+            "description": "Offset untuk pagination",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "filter.search",
+            "description": "Search by name atau email",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.role",
+            "description": "Filter by role",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.isActive",
+            "description": "Filter by active status",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create User",
+        "description": "Membuat user baru (admin only)",
+        "operationId": "UserService_Create",
+        "responses": {
+          "200": {
+            "description": "User berhasil dibuat",
+            "schema": {
+              "$ref": "#/definitions/v1UserResponse"
+            }
+          },
+          "400": {
+            "description": "Data tidak valid",
+            "schema": {}
+          },
+          "409": {
+            "description": "Email sudah terdaftar",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "Get Current User",
+        "description": "Mendapatkan profil user yang sedang login",
+        "operationId": "UserService_GetMe",
+        "responses": {
+          "200": {
+            "description": "Profil user berhasil didapatkan",
+            "schema": {
+              "$ref": "#/definitions/v1UserResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Token tidak valid",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Get User by ID",
+        "description": "Mendapatkan detail user berdasarkan ID",
+        "operationId": "UserService_GetByID",
+        "responses": {
+          "200": {
+            "description": "User berhasil ditemukan",
+            "schema": {
+              "$ref": "#/definitions/v1UserResponse"
+            }
+          },
+          "404": {
+            "description": "User tidak ditemukan",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "UUID user yang dicari",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete User",
+        "description": "Menghapus user (soft delete)",
+        "operationId": "UserService_Delete",
+        "responses": {
+          "200": {
+            "description": "User berhasil dihapus",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteUserResponse"
+            }
+          },
+          "404": {
+            "description": "User tidak ditemukan",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update User",
+        "description": "Mengupdate data user",
+        "operationId": "UserService_Update",
+        "responses": {
+          "200": {
+            "description": "User berhasil diupdate",
+            "schema": {
+              "$ref": "#/definitions/v1UserResponse"
+            }
+          },
+          "404": {
+            "description": "User tidak ditemukan",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserServiceUpdateBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "UserServiceUpdateBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "roleId": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1CreateUserRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Nama lengkap user"
+        },
+        "email": {
+          "type": "string",
+          "title": "Email user (harus unik)"
+        },
+        "password": {
+          "type": "string",
+          "title": "Password user"
+        },
+        "roleId": {
+          "type": "string",
+          "title": "Role ID user"
+        }
+      }
+    },
+    "v1DeleteUserResponse": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/v1MetaData"
+        }
+      }
+    },
+    "v1ListUserResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1User"
+          }
+        },
+        "metadata": {
+          "$ref": "#/definitions/v1MetaData"
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1Pagination"
+        }
+      },
+      "title": "Response untuk list user"
+    },
+    "v1MetaData": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v1Pagination": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "UUID user"
+        },
+        "name": {
+          "type": "string",
+          "title": "Nama lengkap user"
+        },
+        "email": {
+          "type": "string",
+          "title": "Email user"
+        },
+        "role": {
+          "type": "string",
+          "title": "Role user (admin, user, etc)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Timestamp pembuatan"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Timestamp update terakhir"
+        }
+      },
+      "title": "User entity"
+    },
+    "v1UserFilter": {
+      "type": "object",
+      "properties": {
+        "search": {
+          "type": "string",
+          "title": "Search by name atau email"
+        },
+        "role": {
+          "type": "string",
+          "title": "Filter by role"
+        },
+        "isActive": {
+          "type": "boolean",
+          "title": "Filter by active status"
+        }
+      },
+      "title": "Filter untuk list user"
+    },
+    "v1UserResponse": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/v1MetaData"
+        },
+        "data": {
+          "$ref": "#/definitions/v1User"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "description": "Enter 'Bearer {token}' to authenticate",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ]
+}

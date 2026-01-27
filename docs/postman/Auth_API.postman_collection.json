@@ -1,0 +1,298 @@
+{
+    "info": {
+        "_postman_id": "auth-collection-golang-template",
+        "name": "Auth API - Golang Template",
+        "description": "Postman collection untuk Auth module pada Golang Template project.\n\n## Setup\n1. Jalankan server: `make run`\n2. Server berjalan di http://localhost:8080\n\n## Workflow\n1. Register user baru\n2. Login untuk mendapatkan token\n3. Gunakan access_token untuk authenticated requests\n4. Refresh token jika access_token expired",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "refresh_token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Register",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"phone\": \"081234567890\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/auth/register",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "register"
+                    ]
+                },
+                "description": "Mendaftarkan user baru ke sistem.\n\n**Request Body:**\n- `name`: Nama lengkap user\n- `email`: Email (harus unik)\n- `phone`: Nomor telepon\n- `password`: Password minimal 8 karakter\n- `password_confirmation`: Konfirmasi password\n\n**Response:** Empty body jika berhasil"
+            },
+            "response": []
+        },
+        {
+            "name": "Login",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "var jsonData = pm.response.json();",
+                            "",
+                            "if (jsonData.accessToken) {",
+                            "    pm.collectionVariables.set('access_token', jsonData.accessToken);",
+                            "    console.log('Access token saved!');",
+                            "}",
+                            "",
+                            "if (jsonData.refreshToken) {",
+                            "    pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
+                            "    console.log('Refresh token saved!');",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/auth/login",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "login"
+                    ]
+                },
+                "description": "Login dengan email dan password.\n\n**Request Body:**\n- `email`: Email user\n- `password`: Password user\n\n**Response:**\n- `accessToken`: JWT untuk akses API (expires in 15 minutes)\n- `refreshToken`: Token untuk refresh access token\n\n**Note:** Token akan otomatis disimpan ke collection variables."
+            },
+            "response": []
+        },
+        {
+            "name": "Refresh Token",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "var jsonData = pm.response.json();",
+                            "",
+                            "if (jsonData.accessToken) {",
+                            "    pm.collectionVariables.set('access_token', jsonData.accessToken);",
+                            "    console.log('New access token saved!');",
+                            "}",
+                            "",
+                            "if (jsonData.refreshToken) {",
+                            "    pm.collectionVariables.set('refresh_token', jsonData.refreshToken);",
+                            "    console.log('New refresh token saved!');",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/auth/refresh",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "refresh"
+                    ]
+                },
+                "description": "Mendapatkan access token baru menggunakan refresh token.\n\n**Request Body:**\n- `refresh_token`: Refresh token dari login\n\n**Response:**\n- `accessToken`: JWT baru\n- `refreshToken`: Refresh token baru\n\n**Note:** Token baru akan otomatis disimpan."
+            },
+            "response": []
+        },
+        {
+            "name": "Logout",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "if (pm.response.code === 200) {",
+                            "    pm.collectionVariables.set('refresh_token', '');",
+                            "    console.log('Refresh token cleared!');",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/auth/logout",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "logout"
+                    ]
+                },
+                "description": "Logout dan invalidate refresh token.\n\n**Request Body:**\n- `refresh_token`: Refresh token yang akan di-invalidate\n\n**Response:** Empty body jika berhasil"
+            },
+            "response": []
+        },
+        {
+            "name": "Logout All Devices",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "if (pm.response.code === 200) {",
+                            "    pm.collectionVariables.set('access_token', '');",
+                            "    pm.collectionVariables.set('refresh_token', '');",
+                            "    console.log('All tokens cleared!');",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "{{base_url}}/auth/logout-all",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "logout-all"
+                    ]
+                },
+                "description": "Logout dari semua device dengan invalidate semua refresh token.\n\n**Headers:**\n- `Authorization`: Bearer token (required)\n\n**Response:** Empty body jika berhasil"
+            },
+            "response": []
+        },
+        {
+            "name": "Forgot Password",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"email\": \"test@example.com\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/auth/forgot-password",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "forgot-password"
+                    ]
+                },
+                "description": "Request reset password. Email berisi link/token akan dikirim ke email yang terdaftar.\n\n**Request Body:**\n- `email`: Email user yang lupa password\n\n**Response:** Empty body (selalu success untuk security)"
+            },
+            "response": []
+        },
+        {
+            "name": "Reset Password",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"token\": \"reset-token-from-email\",\n    \"new_password\": \"newpassword123\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/auth/reset-password",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "reset-password"
+                    ]
+                },
+                "description": "Reset password menggunakan token dari email.\n\n**Request Body:**\n- `token`: Token dari email forgot password\n- `new_password`: Password baru\n\n**Response:** Empty body jika berhasil"
+            },
+            "response": []
+        }
+    ]
+}
